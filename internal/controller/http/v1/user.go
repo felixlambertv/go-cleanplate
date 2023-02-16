@@ -1,17 +1,19 @@
 package v1
 
 import (
+	"github.com/felixlambertv/go-cleanplate/internal/service"
 	"github.com/felixlambertv/go-cleanplate/pkg/logger"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
 
 type userRoutes struct {
+	s service.User
 	l logger.Interface
 }
 
-func newUserRoutes(handler *gin.RouterGroup, l logger.Interface) {
-	r := &userRoutes{l: l}
+func newUserRoutes(handler *gin.RouterGroup, l logger.Interface, s service.User) {
+	r := &userRoutes{l: l, s: s}
 
 	h := handler.Group("users")
 	{
@@ -26,5 +28,10 @@ type userResponse struct {
 }
 
 func (r *userRoutes) getUser(ctx *gin.Context) {
-	ctx.JSON(http.StatusOK, userResponse{Name: "Nice", Email: "nice@nice.com"})
+	users, err := r.s.GetUsers(ctx)
+	if err != nil {
+		errorResponse(ctx, http.StatusNotFound, "User not found")
+		return
+	}
+	ctx.JSON(http.StatusOK, users)
 }
