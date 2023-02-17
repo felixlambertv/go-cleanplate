@@ -10,6 +10,7 @@ type (
 		App
 		HTTP
 		Log
+		PG
 	}
 
 	App struct {
