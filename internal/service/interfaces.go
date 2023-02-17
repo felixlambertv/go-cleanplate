@@ -1,16 +1,14 @@
 package service
 
 import (
-	"context"
 	"github.com/felixlambertv/go-cleanplate/internal/model"
+	"gorm.io/gorm"
 )
 
-// User Interface
+// IUserService Interface
 type (
-	User interface {
-		GetUsers(ctx context.Context) (*model.User, error)
-	}
-
-	UserRepo interface {
+	IUserService interface {
+		WithTrx(trxHandle *gorm.DB) IUserService
+		GetUsers() ([]model.User, error)
 	}
 )

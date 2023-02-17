@@ -6,7 +6,7 @@ import (
 	"log"
 )
 
-func DBTransactionMiddleware(db *gorm.DB) gin.HandlerFunc {
+func DbTransactionMiddleware(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		txHandle := db.Begin()
 		log.Print("begin db transaction")

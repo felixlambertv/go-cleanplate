@@ -1,17 +1,29 @@
 package user
 
 import (
-	"context"
 	"github.com/felixlambertv/go-cleanplate/internal/model"
+	"github.com/felixlambertv/go-cleanplate/internal/repository"
+	"github.com/felixlambertv/go-cleanplate/internal/service"
+	"gorm.io/gorm"
 )
 
-type User struct {
+type UserService struct {
+	userRepo repository.IUserRepo
 }
 
-func NewUser() *User {
-	return &User{}
+func (u *UserService) GetUsers() ([]model.User, error) {
+	users, err := u.userRepo.FindAll()
+	if err != nil {
+		return nil, err
+	}
+	return users, nil
 }
 
-func (u *User) GetUsers(ctx context.Context) (*model.User, error) {
-	return &model.User{}, nil
+func NewUserService(userRepo repository.IUserRepo) *UserService {
+	return &UserService{userRepo: userRepo}
+}
+
+func (u *UserService) WithTrx(trxHandle *gorm.DB) service.IUserService {
+	u.userRepo = u.userRepo.WithTrx(trxHandle)
+	return u
 }
