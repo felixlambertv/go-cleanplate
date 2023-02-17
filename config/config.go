@@ -7,29 +7,34 @@ import (
 
 type (
 	Config struct {
-		App  `yaml:"app"`
-		HTTP `yaml:"http"`
-		Log  `yaml:"logger"`
+		App
+		HTTP
+		Log
 	}
 
 	App struct {
-		Name    string `yaml:"name"`
-		Version string `yaml:"version"`
+		Name    string `env:"APP_NAME"`
+		Version string `env:"APP_VERSION"`
 	}
 
 	HTTP struct {
-		Port string `yaml:"port"`
+		Port string `env:"HTTP_PORT"`
 	}
 
 	Log struct {
-		Level string `yaml:"log_level"`
+		Level string `env:"LOGGER_LOG_LEVEL"`
+	}
+
+	PG struct {
+		PoolMax int    `env:"PG_POOL_MAX"`
+		URL     string ``
 	}
 )
 
 func NewConfig() (*Config, error) {
 	config := &Config{}
 
-	err := cleanenv.ReadConfig("./config/config.yml", config)
+	err := cleanenv.ReadConfig(".env", config)
 	if err != nil {
 		return nil, fmt.Errorf("config error: %w", err)
 	}
