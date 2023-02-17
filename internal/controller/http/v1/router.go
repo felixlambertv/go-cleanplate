@@ -1,10 +1,11 @@
 package v1
 
 import (
+	"net/http"
+
 	"github.com/felixlambertv/go-cleanplate/internal/service/user"
 	"github.com/felixlambertv/go-cleanplate/pkg/logger"
 	"github.com/gin-gonic/gin"
-	"net/http"
 )
 
 func NewRouter(handler *gin.Engine, l logger.Interface) {
