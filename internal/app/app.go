@@ -7,6 +7,8 @@ import (
 	"github.com/felixlambertv/go-cleanplate/pkg/httpserver"
 	"github.com/felixlambertv/go-cleanplate/pkg/logger"
 	"github.com/gin-gonic/gin"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 	"os"
 	"os/signal"
 	"syscall"
@@ -14,10 +16,14 @@ import (
 
 func Run(cfg *config.Config) {
 	l := logger.NewLogger(cfg.Log.Level)
+	db, err := gorm.Open(postgres.Open(cfg.PG.URL))
+	if err != nil {
+		l.Fatal(fmt.Errorf("app - Run - postgres: %w", err))
+	}
 
 	// HTTP Server
 	handler := gin.New()
-	v1.NewRouter(handler, l)
+	v1.NewRouter(handler, l, db)
 	httpServer := httpserver.NewServer(handler, httpserver.Port(cfg.HTTP.Port))
 
 	interrupt := make(chan os.Signal, 1)
@@ -30,7 +36,7 @@ func Run(cfg *config.Config) {
 		l.Error(fmt.Errorf("%w", err))
 	}
 
-	err := httpServer.Shutdown()
+	err = httpServer.Shutdown()
 	if err != nil {
 		l.Error(fmt.Errorf("%w", err))
 	}

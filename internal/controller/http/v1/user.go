@@ -8,11 +8,11 @@ import (
 )
 
 type userRoutes struct {
-	s service.User
+	s service.IUserService
 	l logger.Interface
 }
 
-func newUserRoutes(handler *gin.RouterGroup, l logger.Interface, s service.User) {
+func newUserRoutes(handler *gin.RouterGroup, l logger.Interface, s service.IUserService) {
 	r := &userRoutes{l: l, s: s}
 
 	h := handler.Group("users")
@@ -28,7 +28,7 @@ type userResponse struct {
 }
 
 func (r *userRoutes) getUser(ctx *gin.Context) {
-	users, err := r.s.GetUsers(ctx)
+	users, err := r.s.GetUsers()
 	if err != nil {
 		errorResponse(ctx, http.StatusNotFound, "User not found")
 		return
