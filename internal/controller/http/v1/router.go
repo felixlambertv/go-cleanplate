@@ -2,11 +2,12 @@ package v1
 
 import (
 	userR "github.com/felixlambertv/go-cleanplate/internal/repository/user"
+	"net/http"
+
 	"github.com/felixlambertv/go-cleanplate/internal/service/user"
 	"github.com/felixlambertv/go-cleanplate/pkg/logger"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
-	"net/http"
 )
 
 func NewRouter(handler *gin.Engine, l logger.Interface, db *gorm.DB) {

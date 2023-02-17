@@ -2,6 +2,10 @@ package app
 
 import (
 	"fmt"
+	"os"
+	"os/signal"
+	"syscall"
+
 	"github.com/felixlambertv/go-cleanplate/config"
 	v1 "github.com/felixlambertv/go-cleanplate/internal/controller/http/v1"
 	"github.com/felixlambertv/go-cleanplate/pkg/httpserver"
