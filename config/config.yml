@@ -1,9 +1,0 @@
-app:
-  name: 'go-cleanplate'
-  version: '1.0.0'
-
-http:
-  port: '8000'
-
-logger:
-  log_level: 'debug'
