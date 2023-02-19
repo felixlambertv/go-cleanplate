@@ -11,6 +11,6 @@ type (
 	IUserRepo interface {
 		WithTrx(trxHandle *gorm.DB) IUserRepo
 		FindAll() ([]model.User, error)
-		Store() (*model.User, error)
+		Store(user *model.User) (*model.User, error)
 	}
 )

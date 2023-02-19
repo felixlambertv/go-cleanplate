@@ -25,13 +25,12 @@ func (u *UserRepo) WithTrx(trxHandle *gorm.DB) repository.IUserRepo {
 	return u
 }
 
-func (u *UserRepo) Store() (*model.User, error) {
-	return &model.User{
-		ID:       0,
-		Name:     "",
-		Email:    "",
-		Password: "",
-	}, nil
+func (u *UserRepo) Store(user *model.User) (*model.User, error) {
+	err := u.db.Create(user).Error
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
 }
 
 func (u *UserRepo) FindAll() ([]model.User, error) {
