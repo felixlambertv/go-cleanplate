@@ -2,9 +2,11 @@ package v1
 
 import (
 	"github.com/felixlambertv/go-cleanplate/internal/controller/request"
+	"github.com/felixlambertv/go-cleanplate/internal/middleware"
 	"github.com/felixlambertv/go-cleanplate/internal/service"
 	"github.com/felixlambertv/go-cleanplate/pkg/logger"
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 	"net/http"
 	"strings"
 )
@@ -14,13 +16,13 @@ type userRoutes struct {
 	l logger.Interface
 }
 
-func newUserRoutes(handler *gin.RouterGroup, l logger.Interface, s service.IUserService) {
+func newUserRoutes(handler *gin.RouterGroup, l logger.Interface, db *gorm.DB, s service.IUserService) {
 	r := &userRoutes{l: l, s: s}
 
 	h := handler.Group("users")
 	{
 		h.GET("", r.getUser)
-		h.POST("", r.createUser)
+		h.POST("", middleware.DbTransactionMiddleware(db), r.createUser)
 	}
 }
 
@@ -31,8 +33,8 @@ func (r *userRoutes) createUser(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, "request not valid")
 		return
 	}
-
-	user, err := r.s.CreateUser(req)
+	txHandle := ctx.MustGet("db_trx").(*gorm.DB)
+	user, err := r.s.WithTrx(txHandle).CreateUser(req)
 	if err != nil {
 		if strings.Contains(err.Error(), "SQLSTATE 23505") {
 			errorResponse(ctx, http.StatusConflict, "Duplicate email", err.Error())

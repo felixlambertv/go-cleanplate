@@ -23,6 +23,6 @@ func NewRouter(handler *gin.Engine, l logger.Interface, db *gorm.DB) {
 
 	h := handler.Group("api/v1")
 	{
-		newUserRoutes(h, l, userService)
+		newUserRoutes(h, l, db, userService)
 	}
 }
