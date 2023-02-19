@@ -5,7 +5,7 @@ services:
     container_name: dev_postgres_db
     image: postgres:13-alpine
     ports: 
-      - 5432:5432
+      - ${PG_PORT}:${PG_PORT}
     environment:
       - POSTGRES_USER=${PG_USER}
       - POSTGRES_PASSWORD=${PG_PASSWORD}
