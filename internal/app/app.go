@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/felixlambertv/go-cleanplate/config"
 	v1 "github.com/felixlambertv/go-cleanplate/internal/controller/http/v1"
+	"github.com/felixlambertv/go-cleanplate/internal/model"
 	"github.com/felixlambertv/go-cleanplate/pkg/httpserver"
 	"github.com/felixlambertv/go-cleanplate/pkg/logger"
 	"github.com/gin-gonic/gin"
@@ -19,6 +20,10 @@ func Run(cfg *config.Config) {
 	db, err := gorm.Open(postgres.Open(cfg.PG.GetDbConnectionUrl()))
 	if err != nil {
 		l.Fatal(fmt.Errorf("app - Run - postgres: %w", err))
+	}
+	err = db.AutoMigrate(&model.User{})
+	if err != nil {
+		l.Fatal(fmt.Errorf("app - Run - migrate: %w", err))
 	}
 
 	// HTTP Server
