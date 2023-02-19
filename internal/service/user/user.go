@@ -1,6 +1,7 @@
 package user
 
 import (
+	"github.com/felixlambertv/go-cleanplate/internal/controller/request"
 	"github.com/felixlambertv/go-cleanplate/internal/model"
 	"github.com/felixlambertv/go-cleanplate/internal/repository"
 	"github.com/felixlambertv/go-cleanplate/internal/service"
@@ -9,6 +10,19 @@ import (
 
 type UserService struct {
 	userRepo repository.IUserRepo
+}
+
+func (u *UserService) CreateUser(req request.CreateUserRequest) (*model.User, error) {
+	user := &model.User{
+		Name:     req.Name,
+		Email:    req.Email,
+		Password: req.Password,
+	}
+	user, err := u.userRepo.Store(user)
+	if err != nil {
+		return nil, err
+	}
+	return user, err
 }
 
 func (u *UserService) GetUsers() ([]model.User, error) {
