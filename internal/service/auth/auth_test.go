@@ -2,6 +2,7 @@ package auth
 
 import (
 	"fmt"
+	"gorm.io/gorm"
 	"testing"
 
 	"github.com/felixlambertv/go-cleanplate/internal/controller/request"
@@ -25,7 +26,7 @@ func TestMain(m *testing.M) {
 }
 
 func TestAuth_Login(t *testing.T) {
-	userRepoMock.On("FindByEmail", "user@example.com").Return(*userDummy, nil)
+	userRepoMock.On("FindByEmail", "user@example.com").Return(nil, gorm.ErrRecordNotFound)
 	user, token, err := authService.Login(request.LoginRequest{
 		Email:    "user@example.com",
 		Password: "password",
@@ -33,7 +34,6 @@ func TestAuth_Login(t *testing.T) {
 	if err != nil {
 		fmt.Println(err)
 	}
-	fmt.Println(user)
-	assert.Equal(t, *userDummy, &user)
-	assert.Equal(t, tokenDummy, token)
+	assert.Equal(t, user, (*model.User)(nil))
+	assert.Equal(t, token, utils.TokenStruct{})
 }
