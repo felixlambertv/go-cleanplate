@@ -2,28 +2,16 @@ package user
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/felixlambertv/go-cleanplate/internal/model"
 	"github.com/felixlambertv/go-cleanplate/mocks"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 var userRepoMock = new(mocks.IUserRepo)
 var userService = NewUserService(userRepoMock)
-var userDummy = []model.User{
-	{
-		ID:       1,
-		Name:     "",
-		Email:    "",
-		Password: "",
-	},
-	{
-		ID:       1,
-		Name:     "",
-		Email:    "",
-		Password: "",
-	},
-}
+var userDummy = []model.User{}
 
 func TestMain(m *testing.M) {
 	fmt.Print("before")

@@ -12,8 +12,8 @@ type UserRepo struct {
 	db *gorm.DB
 }
 
-func NewUserRepo(db *gorm.DB) *UserRepo {
-	return &UserRepo{db: db}
+func NewUserRepo(db *gorm.DB, l logger.Interface) *UserRepo {
+	return &UserRepo{db: db, l: l}
 }
 
 func (u *UserRepo) WithTrx(trxHandle *gorm.DB) repository.IUserRepo {
@@ -33,19 +33,18 @@ func (u *UserRepo) Store(user *model.User) (*model.User, error) {
 	return user, nil
 }
 
-func (u *UserRepo) FindAll() ([]model.User, error) {
-	return []model.User{
-		{
-			ID:       1,
-			Name:     "",
-			Email:    "",
-			Password: "",
-		},
-		{
-			ID:       1,
-			Name:     "",
-			Email:    "",
-			Password: "",
-		},
-	}, nil
+func (u *UserRepo) FindAll() (users []model.User, err error) {
+	result := u.db.Find(users)
+
+	if result.Error != nil {
+		return users, err
+	}
+
+	return users, nil
+}
+
+func (u *UserRepo) FindByEmail(email string) (*model.User, error) {
+	var user *model.User
+	err := u.db.Debug().Where("email_address = ?", email).Take(&user).Error
+	return user, err
 }

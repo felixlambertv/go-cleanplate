@@ -10,7 +10,7 @@ help:
 
 dev:
 	if [ ! -f .env ]; then cp .env.example .env; fi;
-	docker-compose -f docker-compose.yml up --build --attach server --attach postgres_db
+	docker-compose -f docker-compose.yml up --build
 
 clean:
 	docker-compose -f docker-compose.yml down -v

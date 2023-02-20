@@ -12,5 +12,6 @@ type (
 		WithTrx(trxHandle *gorm.DB) IUserRepo
 		FindAll() ([]model.User, error)
 		Store(user *model.User) (*model.User, error)
+		FindByEmail(email string) (*model.User, error)
 	}
 )

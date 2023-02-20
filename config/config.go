@@ -2,8 +2,13 @@ package config
 
 import (
 	"fmt"
+	"log"
+	"sync"
+
 	"github.com/ilyakaznacheev/cleanenv"
 )
+
+var once sync.Once
 
 type (
 	Config struct {
@@ -14,9 +19,11 @@ type (
 	}
 
 	App struct {
-		Name    string `env:"APP_NAME"`
-		Version string `env:"APP_VERSION"`
-		Url     string `env:"APP_URL"`
+		Name          string `env:"APP_NAME"`
+		Version       string `env:"APP_VERSION"`
+		Url           string `env:"APP_URL"`
+		Secret        string `env:"APP_SECRET"`
+		TokenLifespan int    `env:"TOKEN_HOUR_LIFESPAN"`
 	}
 
 	HTTP struct {
@@ -38,7 +45,25 @@ type (
 	}
 )
 
-func NewConfig() (*Config, error) {
+func GetInstance() *Config {
+	var configInstance *Config
+
+	if configInstance == nil {
+		once.Do(func() {
+			confInstance, err := newConfig()
+
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			configInstance = confInstance
+		})
+	}
+
+	return configInstance
+}
+
+func newConfig() (*Config, error) {
 	config := &Config{}
 
 	err := cleanenv.ReadConfig(".env", config)
