@@ -1,6 +1,8 @@
 package auth
 
 import (
+	"errors"
+
 	"github.com/felixlambertv/go-cleanplate/internal/controller/request"
 	"github.com/felixlambertv/go-cleanplate/internal/model"
 	"github.com/felixlambertv/go-cleanplate/internal/repository"
@@ -32,12 +34,23 @@ func (a *AuthService) Login(req request.LoginRequest) (*model.User, utils.TokenS
 }
 
 func verifyPassword(u *model.User, password string) error {
-	return bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(password))
+	err := bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(password))
+
+	if err != nil {
+		switch err {
+		case bcrypt.ErrMismatchedHashAndPassword:
+			return errors.New("password is incorrect")
+		default:
+			return err
+		}
+	}
+
+	return err
 }
 
-func encryptPassword(u *model.User) (string, error) {
+func (a *AuthService) EncryptPassword(password string) (string, error) {
 	//turn password into hash
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(u.Password), bcrypt.DefaultCost)
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
 		return "", err
 	}

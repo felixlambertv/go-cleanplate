@@ -1,22 +1,22 @@
-package v1
+package utils
 
 import "github.com/gin-gonic/gin"
 
-type errorRes struct {
+type ErrorRes struct {
 	Message string `json:"message"`
 	Debug   error  `json:"debug,omitempty"`
 	Errors  any    `json:"errors"`
 }
 
-type successRes struct {
+type SuccessRes struct {
 	Message string `json:"message"`
 	Data    any    `json:"data,omitempty"`
 }
 
-func errorResponse(c *gin.Context, code int, res errorRes) {
+func ErrorResponse(c *gin.Context, code int, res ErrorRes) {
 	c.JSON(code, res)
 }
 
-func successResponse(c *gin.Context, code int, res successRes) {
+func SuccessResponse(c *gin.Context, code int, res SuccessRes) {
 	c.JSON(code, res)
 }

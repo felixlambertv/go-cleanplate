@@ -8,6 +8,7 @@ import (
 	"github.com/felixlambertv/go-cleanplate/internal/middleware"
 	"github.com/felixlambertv/go-cleanplate/internal/service"
 	"github.com/felixlambertv/go-cleanplate/pkg/logger"
+	"github.com/felixlambertv/go-cleanplate/pkg/utils"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
@@ -32,7 +33,7 @@ func (r *userRoutes) createUser(ctx *gin.Context) {
 
 	err := ctx.ShouldBindJSON(&req)
 	if err != nil {
-		errorResponse(ctx, http.StatusBadRequest, errorRes{
+		utils.ErrorResponse(ctx, http.StatusBadRequest, utils.ErrorRes{
 			Message: "request not valid",
 			Debug:   err,
 			Errors:  err.Error(),
@@ -44,13 +45,13 @@ func (r *userRoutes) createUser(ctx *gin.Context) {
 	user, err := r.s.WithTrx(txHandle).CreateUser(req)
 	if err != nil {
 		if strings.Contains(err.Error(), "SQLSTATE 23505") {
-			errorResponse(ctx, http.StatusConflict, errorRes{
+			utils.ErrorResponse(ctx, http.StatusConflict, utils.ErrorRes{
 				Message: "Duplicate email",
 				Debug:   err,
 				Errors:  err.Error(),
 			})
 		} else {
-			errorResponse(ctx, http.StatusInternalServerError, errorRes{
+			utils.ErrorResponse(ctx, http.StatusInternalServerError, utils.ErrorRes{
 				Message: "Something went wrong",
 				Debug:   err,
 				Errors:  err.Error(),
@@ -59,7 +60,7 @@ func (r *userRoutes) createUser(ctx *gin.Context) {
 		return
 	}
 
-	successResponse(ctx, http.StatusOK, successRes{
+	utils.SuccessResponse(ctx, http.StatusOK, utils.SuccessRes{
 		Message: "Success Creating new user",
 		Data:    user,
 	})
@@ -68,14 +69,15 @@ func (r *userRoutes) createUser(ctx *gin.Context) {
 func (r *userRoutes) getUser(ctx *gin.Context) {
 	users, err := r.s.GetUsers()
 	if err != nil {
-		errorResponse(ctx, http.StatusNotFound, errorRes{
+		utils.ErrorResponse(ctx, http.StatusNotFound, utils.ErrorRes{
 			Message: "User not found",
 			Debug:   nil,
 			Errors:  nil,
 		})
 		return
 	}
-	successResponse(ctx, http.StatusOK, successRes{
+
+	utils.SuccessResponse(ctx, http.StatusOK, utils.SuccessRes{
 		Message: "Success Get Users",
 		Data:    users,
 	})

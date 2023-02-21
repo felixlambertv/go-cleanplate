@@ -66,7 +66,7 @@ func GetInstance() *Config {
 func newConfig() (*Config, error) {
 	config := &Config{}
 
-	err := cleanenv.ReadConfig(".env", config)
+	err := cleanenv.ReadConfig("../../../.env", config)
 	if err != nil {
 		return nil, fmt.Errorf("config error: %w", err)
 	}
