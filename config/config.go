@@ -2,6 +2,8 @@ package config
 
 import (
 	"fmt"
+	"log"
+	"sync"
 
 	"github.com/ilyakaznacheev/cleanenv"
 )
@@ -47,24 +49,37 @@ type (
 	}
 )
 
-var config *Config
+var (
+	once     sync.Once
+	instance *Config
+)
 
-func NewConfig() (*Config, error) {
-	err := cleanenv.ReadConfig("../../../.env", config)
-	if err != nil {
-		return nil, fmt.Errorf("config error: %w", err)
+func GetInstance() *Config {
+	if instance == nil {
+		once.Do(func() {
+			cfg, err := newConfig()
+
+			if err != nil {
+				log.Fatal(err)
+			}
+			instance = cfg
+		})
 	}
 
-	err = cleanenv.ReadEnv(config)
+	return instance
+}
+
+func newConfig() (*Config, error) {
+	cfg := &Config{}
+	err := cleanenv.ReadConfig(".env", cfg)
 	if err != nil {
 		return nil, err
 	}
-
-	return config, err
-}
-
-func GetConfig() *Config {
-	return config
+	err = cleanenv.ReadEnv(cfg)
+	if err != nil {
+		return nil, err
+	}
+	return cfg, nil
 }
 
 func (pg PG) GetDbConnectionUrl() string {
