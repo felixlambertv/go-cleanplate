@@ -16,7 +16,7 @@ type (
 	}
 
 	IAuthService interface {
-		Login(req request.LoginRequest) (*model.User, utils.TokenStruct, error)
-		EncryptPassword(u *model.User) (string, error)
+		Login(req request.LoginRequest) (*model.User, *utils.Token, error)
+		EncryptPassword(password string) (string, error)
 	}
 )

@@ -3,6 +3,7 @@ package auth
 import (
 	"errors"
 
+	"github.com/felixlambertv/go-cleanplate/config"
 	"github.com/felixlambertv/go-cleanplate/internal/controller/request"
 	"github.com/felixlambertv/go-cleanplate/internal/model"
 	"github.com/felixlambertv/go-cleanplate/internal/repository"
@@ -11,23 +12,24 @@ import (
 )
 
 type AuthService struct {
+	cfg      *config.Config
 	userRepo repository.IUserRepo
 }
 
-func (a *AuthService) Login(req request.LoginRequest) (*model.User, utils.TokenStruct, error) {
+func (a *AuthService) Login(req request.LoginRequest) (*model.User, *utils.Token, error) {
 	user, err := a.userRepo.FindByEmail(req.Email)
 	if err != nil {
-		return nil, utils.TokenStruct{}, err
+		return nil, nil, err
 	}
 
 	err = verifyPassword(user, req.Password)
 	if err != nil {
-		return nil, utils.TokenStruct{}, err
+		return nil, nil, err
 	}
 
-	token, err := utils.GenerateToken(*user)
+	token, err := utils.GenerateToken(user, a.cfg.App.TokenLifespan, a.cfg.App.Secret)
 	if err != nil {
-		return nil, utils.TokenStruct{}, err
+		return nil, nil, err
 	}
 
 	return user, token, nil
@@ -58,6 +60,6 @@ func (a *AuthService) EncryptPassword(password string) (string, error) {
 	return string(hashedPassword), err
 }
 
-func NewAuthService(userRepo repository.IUserRepo) *AuthService {
-	return &AuthService{userRepo: userRepo}
+func NewAuthService(userRepo repository.IUserRepo, cfg *config.Config) *AuthService {
+	return &AuthService{userRepo: userRepo, cfg: cfg}
 }

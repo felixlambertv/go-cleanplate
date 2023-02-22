@@ -2,34 +2,30 @@ package utils
 
 import (
 	"fmt"
-	"strconv"
 	"strings"
 	"time"
 
-	"github.com/felixlambertv/go-cleanplate/config"
 	"github.com/felixlambertv/go-cleanplate/internal/model"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
 )
 
-type TokenStruct struct {
+type Token struct {
 	Token   string
 	Expires time.Time
 }
 
-func GenerateToken(user model.User) (TokenStruct, error) {
-	conf := config.GetInstance()
+func GenerateToken(user *model.User, lifespan int, secret string) (*Token, error) {
+	token := &Token{}
 
-	token := TokenStruct{}
-
-	expTime := time.Now().Add(time.Hour * time.Duration(conf.App.TokenLifespan))
+	expTime := time.Now().Add(time.Hour * time.Duration(lifespan))
 
 	claims := jwt.MapClaims{}
 	claims["authorized"] = true
 	claims["user"] = user
 	claims["expire"] = expTime.Unix()
 	unsignedToken := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	signedToken, errSign := unsignedToken.SignedString([]byte(conf.App.Secret))
+	signedToken, errSign := unsignedToken.SignedString([]byte(secret))
 
 	token.Token = signedToken
 	token.Expires = expTime
@@ -37,13 +33,12 @@ func GenerateToken(user model.User) (TokenStruct, error) {
 	return token, errSign
 }
 
-func ParseToken(tokenString string) (*jwt.Token, error) {
-	conf := config.GetInstance()
+func ParseToken(tokenString string, secret string) (*jwt.Token, error) {
 	parsedToken, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
-		return []byte(conf.App.Secret), nil
+		return []byte(secret), nil
 	})
 	if err != nil {
 		return nil, err
@@ -68,16 +63,4 @@ func ExtractToken(c *gin.Context) string {
 		return strings.Split(bearerToken, " ")[1]
 	}
 	return ""
-}
-
-func ExtractUserLevel(token *jwt.Token) (int, error) {
-	claims, ok := token.Claims.(jwt.MapClaims)
-	if ok && token.Valid {
-		ulevel, err := strconv.ParseUint(fmt.Sprintf("%.0f", claims["user_level"]), 10, 32)
-		if err != nil {
-			return 0, err
-		}
-		return int(ulevel), nil
-	}
-	return 0, nil
 }

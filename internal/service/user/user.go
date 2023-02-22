@@ -1,6 +1,7 @@
 package user
 
 import (
+	"github.com/felixlambertv/go-cleanplate/config"
 	"github.com/felixlambertv/go-cleanplate/internal/controller/request"
 	"github.com/felixlambertv/go-cleanplate/internal/model"
 	"github.com/felixlambertv/go-cleanplate/internal/repository"
@@ -9,6 +10,7 @@ import (
 )
 
 type UserService struct {
+	cfg      config.IConfig
 	userRepo repository.IUserRepo
 }
 

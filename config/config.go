@@ -2,13 +2,15 @@ package config
 
 import (
 	"fmt"
-	"log"
-	"sync"
 
 	"github.com/ilyakaznacheev/cleanenv"
 )
 
-var once sync.Once
+type IConfig interface {
+	NewConfig() (*Config, error)
+	GetConfig() *Config
+	GetDbConnectionUrl() string
+}
 
 type (
 	Config struct {
@@ -45,27 +47,9 @@ type (
 	}
 )
 
-func GetInstance() *Config {
-	var configInstance *Config
+var config *Config
 
-	if configInstance == nil {
-		once.Do(func() {
-			confInstance, err := newConfig()
-
-			if err != nil {
-				log.Fatal(err)
-			}
-
-			configInstance = confInstance
-		})
-	}
-
-	return configInstance
-}
-
-func newConfig() (*Config, error) {
-	config := &Config{}
-
+func NewConfig() (*Config, error) {
 	err := cleanenv.ReadConfig("../../../.env", config)
 	if err != nil {
 		return nil, fmt.Errorf("config error: %w", err)
@@ -77,6 +61,10 @@ func newConfig() (*Config, error) {
 	}
 
 	return config, err
+}
+
+func GetConfig() *Config {
+	return config
 }
 
 func (pg PG) GetDbConnectionUrl() string {

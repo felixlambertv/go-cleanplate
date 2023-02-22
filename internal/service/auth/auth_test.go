@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/felixlambertv/go-cleanplate/config"
 	"github.com/felixlambertv/go-cleanplate/internal/controller/request"
 	"github.com/felixlambertv/go-cleanplate/internal/model"
 	"github.com/felixlambertv/go-cleanplate/mocks"
@@ -13,8 +14,9 @@ import (
 	"gorm.io/gorm"
 )
 
+var cfg = &config.Config{}
 var userRepoMock = new(mocks.IUserRepo)
-var authService = NewAuthService(userRepoMock)
+var authService = NewAuthService(userRepoMock, cfg)
 
 var LoginRequest = request.LoginRequest{
 	Email:    "user@test.com",
