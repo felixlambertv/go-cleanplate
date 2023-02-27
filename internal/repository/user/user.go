@@ -34,7 +34,7 @@ func (u *UserRepo) Store(user *model.User) (*model.User, error) {
 }
 
 func (u *UserRepo) FindAll() (users []model.User, err error) {
-	result := u.db.Find(users)
+	result := u.db.Find(&users)
 
 	if result.Error != nil {
 		return users, err
