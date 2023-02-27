@@ -1,14 +1,20 @@
 package utils
 
 import (
+	"errors"
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/felixlambertv/go-cleanplate/internal/model"
-	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
 )
+
+type TokenClaims struct {
+	jwt.StandardClaims
+	Authorized bool        `json:"authorized"`
+	User       *model.User `json:"user"`
+	Expire     int64       `json:"expire"`
+}
 
 type Token struct {
 	Token   string
@@ -20,10 +26,10 @@ func GenerateToken(user *model.User, lifespan int, secret string) (*Token, error
 
 	expTime := time.Now().Add(time.Hour * time.Duration(lifespan))
 
-	claims := jwt.MapClaims{}
-	claims["authorized"] = true
-	claims["user"] = user
-	claims["expire"] = expTime.Unix()
+	claims := TokenClaims{}
+	claims.Authorized = true
+	claims.User = user
+	claims.Expire = expTime.Unix()
 	unsignedToken := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	signedToken, errSign := unsignedToken.SignedString([]byte(secret))
 
@@ -33,8 +39,9 @@ func GenerateToken(user *model.User, lifespan int, secret string) (*Token, error
 	return token, errSign
 }
 
-func ParseToken(tokenString string, secret string) (*jwt.Token, error) {
-	parsedToken, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+func ParseToken(tokenString string, secret string) (*TokenClaims, error) {
+	claims := &TokenClaims{}
+	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
@@ -43,24 +50,11 @@ func ParseToken(tokenString string, secret string) (*jwt.Token, error) {
 	if err != nil {
 		return nil, err
 	}
-	return parsedToken, nil
-}
 
-func ExtractToken(c *gin.Context) string {
-	token := c.Query("token")
-	if token != "" {
-		return token
-	}
-	bearerToken := c.Request.Header.Get("Authorization")
-
-	// Apple already reserved header for Authorization
-	// https://developer.apple.com/documentation/foundation/nsurlrequest
-	if bearerToken == "" {
-		bearerToken = c.Request.Header.Get("X-Authorization")
+	claims, ok := token.Claims.(*TokenClaims)
+	if ok && token.Valid {
+		return claims, nil
 	}
 
-	if len(strings.Split(bearerToken, " ")) == 2 {
-		return strings.Split(bearerToken, " ")[1]
-	}
-	return ""
+	return nil, errors.New("token invalid")
 }

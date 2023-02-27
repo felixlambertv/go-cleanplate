@@ -28,7 +28,7 @@ func NewRouter(handler *gin.Engine, l logger.Interface, db *gorm.DB, cfg *config
 
 	h := handler.Group("api/v1")
 	{
-		newAuthRoutes(h, l, db, authService, cfg)
-		newUserRoutes(h, l, db, userService)
+		newAuthRoutes(h, l, db, authService)
+		newUserRoutes(h, l, db, userService, cfg)
 	}
 }

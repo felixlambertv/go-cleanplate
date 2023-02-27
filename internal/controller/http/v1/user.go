@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/felixlambertv/go-cleanplate/config"
 	"github.com/felixlambertv/go-cleanplate/internal/controller/request"
 	"github.com/felixlambertv/go-cleanplate/internal/middleware"
 	"github.com/felixlambertv/go-cleanplate/internal/service"
@@ -14,14 +15,15 @@ import (
 )
 
 type userRoutes struct {
-	s service.IUserService
-	l logger.Interface
+	s   service.IUserService
+	l   logger.Interface
+	cfg *config.Config
 }
 
-func newUserRoutes(handler *gin.RouterGroup, l logger.Interface, db *gorm.DB, s service.IUserService) {
-	r := &userRoutes{l: l, s: s}
+func newUserRoutes(handler *gin.RouterGroup, l logger.Interface, db *gorm.DB, s service.IUserService, cfg *config.Config) {
+	r := &userRoutes{l: l, s: s, cfg: cfg}
 
-	h := handler.Group("users")
+	h := handler.Group("users").Use(middleware.JWTAuthMiddleware(cfg, 1))
 	{
 		h.GET("", r.getUser)
 		h.POST("", middleware.DbTransactionMiddleware(db), r.createUser)
