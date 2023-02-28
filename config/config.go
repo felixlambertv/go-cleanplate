@@ -2,8 +2,17 @@ package config
 
 import (
 	"fmt"
+	"log"
+	"sync"
+
 	"github.com/ilyakaznacheev/cleanenv"
 )
+
+type IConfig interface {
+	NewConfig() (*Config, error)
+	GetConfig() *Config
+	GetDbConnectionUrl() string
+}
 
 type (
 	Config struct {
@@ -14,9 +23,11 @@ type (
 	}
 
 	App struct {
-		Name    string `env:"APP_NAME"`
-		Version string `env:"APP_VERSION"`
-		Url     string `env:"APP_URL"`
+		Name          string `env:"APP_NAME"`
+		Version       string `env:"APP_VERSION"`
+		Url           string `env:"APP_URL"`
+		Secret        string `env:"APP_SECRET"`
+		TokenLifespan int    `env:"TOKEN_HOUR_LIFESPAN"`
 	}
 
 	HTTP struct {
@@ -38,20 +49,37 @@ type (
 	}
 )
 
-func NewConfig() (*Config, error) {
-	config := &Config{}
+var (
+	once     sync.Once
+	instance *Config
+)
 
-	err := cleanenv.ReadConfig(".env", config)
-	if err != nil {
-		return nil, fmt.Errorf("config error: %w", err)
+func GetInstance() *Config {
+	if instance == nil {
+		once.Do(func() {
+			cfg, err := newConfig()
+
+			if err != nil {
+				log.Fatal(err)
+			}
+			instance = cfg
+		})
 	}
 
-	err = cleanenv.ReadEnv(config)
+	return instance
+}
+
+func newConfig() (*Config, error) {
+	cfg := &Config{}
+	err := cleanenv.ReadConfig(".env", cfg)
 	if err != nil {
 		return nil, err
 	}
-
-	return config, err
+	err = cleanenv.ReadEnv(cfg)
+	if err != nil {
+		return nil, err
+	}
+	return cfg, nil
 }
 
 func (pg PG) GetDbConnectionUrl() string {

@@ -2,6 +2,10 @@ package app
 
 import (
 	"fmt"
+	"os"
+	"os/signal"
+	"syscall"
+
 	"github.com/felixlambertv/go-cleanplate/config"
 	v1 "github.com/felixlambertv/go-cleanplate/internal/controller/http/v1"
 	"github.com/felixlambertv/go-cleanplate/internal/model"
@@ -10,9 +14,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	"os"
-	"os/signal"
-	"syscall"
 )
 
 func Run(cfg *config.Config) {
@@ -28,7 +29,7 @@ func Run(cfg *config.Config) {
 
 	// HTTP Server
 	handler := gin.New()
-	v1.NewRouter(handler, l, db)
+	v1.NewRouter(handler, l, db, cfg)
 	httpServer := httpserver.NewServer(handler, httpserver.Port(cfg.HTTP.Port))
 
 	interrupt := make(chan os.Signal, 1)
