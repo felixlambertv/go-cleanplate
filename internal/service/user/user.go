@@ -13,6 +13,10 @@ type UserService struct {
 	userRepo repository.IUserRepo
 }
 
+func NewUserService(userRepo repository.IUserRepo) *UserService {
+	return &UserService{userRepo: userRepo}
+}
+
 func (u *UserService) CreateUser(req request.CreateUserRequest) (*model.User, error) {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 	if err != nil {
@@ -37,10 +41,6 @@ func (u *UserService) GetUsers() ([]model.User, error) {
 		return nil, err
 	}
 	return users, nil
-}
-
-func NewUserService(userRepo repository.IUserRepo) *UserService {
-	return &UserService{userRepo: userRepo}
 }
 
 func (u *UserService) WithTrx(trxHandle *gorm.DB) service.IUserService {

@@ -1,7 +1,6 @@
 package v1
 
 import (
-	"encoding/json"
 	"net/http"
 
 	"github.com/felixlambertv/go-cleanplate/internal/controller/request"
@@ -30,7 +29,6 @@ func newAuthRoutes(handler *gin.RouterGroup, l logger.Interface, db *gorm.DB, s 
 
 func (r *authRoutes) login(ctx *gin.Context) {
 	var req request.LoginRequest
-	var res response.LoginResponse
 
 	err := ctx.ShouldBindJSON(&req)
 	if err != nil {
@@ -52,10 +50,16 @@ func (r *authRoutes) login(ctx *gin.Context) {
 		return
 	}
 
-	userMarshal, _ := json.Marshal(user)
-	json.Unmarshal(userMarshal, &res)
-	tokenMarshal, _ := json.Marshal(token)
-	json.Unmarshal(tokenMarshal, &res)
+	res := response.LoginResponse{
+		ID:        user.ID,
+		Name:      user.Name,
+		Email:     user.Email,
+		UserLevel: user.UserLevel,
+		CreatedAt: user.CreatedAt,
+		UpdatedAt: user.UpdatedAt,
+		Token:     token.Token,
+		Expires:   token.Expires,
+	}
 
 	utils.SuccessResponse(ctx, http.StatusOK, utils.SuccessRes{
 		Message: "Login Successful",

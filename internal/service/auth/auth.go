@@ -16,6 +16,10 @@ type AuthService struct {
 	userRepo repository.IUserRepo
 }
 
+func NewAuthService(userRepo repository.IUserRepo, cfg *config.Config) *AuthService {
+	return &AuthService{userRepo: userRepo, cfg: cfg}
+}
+
 func (a *AuthService) Login(req request.LoginRequest) (*model.User, *utils.Token, error) {
 	user, err := a.userRepo.FindByEmail(req.Email)
 	if err != nil {
@@ -35,6 +39,16 @@ func (a *AuthService) Login(req request.LoginRequest) (*model.User, *utils.Token
 	return user, token, nil
 }
 
+func (a *AuthService) EncryptPassword(password string) (string, error) {
+	//turn password into hash
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return "", err
+	}
+
+	return string(hashedPassword), err
+}
+
 func verifyPassword(u *model.User, password string) error {
 	err := bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(password))
 
@@ -48,18 +62,4 @@ func verifyPassword(u *model.User, password string) error {
 	}
 
 	return err
-}
-
-func (a *AuthService) EncryptPassword(password string) (string, error) {
-	//turn password into hash
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-	if err != nil {
-		return "", err
-	}
-
-	return string(hashedPassword), err
-}
-
-func NewAuthService(userRepo repository.IUserRepo, cfg *config.Config) *AuthService {
-	return &AuthService{userRepo: userRepo, cfg: cfg}
 }

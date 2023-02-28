@@ -45,6 +45,6 @@ func (u *UserRepo) FindAll() (users []model.User, err error) {
 
 func (u *UserRepo) FindByEmail(email string) (*model.User, error) {
 	var user *model.User
-	err := u.db.Debug().Where("email = ?", email).Take(&user).Error
+	err := u.db.Where("email = ?", email).Take(&user).Error
 	return user, err
 }
